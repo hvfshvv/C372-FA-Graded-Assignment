@@ -1,0 +1,18 @@
+<h1>Seasonal Stitch Product List</h1>
+<a href="/add">+ Add New Product</a>
+<table border="1">
+  <tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Image</th><th>Actions</th></tr>
+  <% products.forEach(product => { %>
+  <tr>
+    <td><%= product.productId %></td>
+    <td><%= product.name %></td>
+    <td><%= product.category %></td>
+    <td>$<%= product.price %></td>
+    <td><img src="/uploads/<%= product.image %>" width="80"></td>
+    <td>
+      <a href="/update/<%= product.productId %>">Edit</a>
+      <a href="/delete/<%= product.productId %>">Delete</a>
+    </td>
+  </tr>
+  <% }) %>
+</table>
