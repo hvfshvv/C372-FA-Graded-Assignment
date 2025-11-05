@@ -1,99 +1,58 @@
-// controllers/ProductController.js
 const Hoodie = require('../models/Hoodie');
 
 const ProductController = {
-    // List all hoodies - render index.ejs for both admin and users (basic)
-    list: function(req, res) {
-        Hoodie.getAll(function(err, hoodies) {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Internal Server Error');
-            }
-
-            const user = (req.session && req.session.user) ? req.session.user : null;
-
-            if (Array.isArray(hoodies)) {
-                hoodies.forEach(h => {
-                    h.stock = Number(h.stock) || 0;
-                    h.lowStock = h.stock < 30;
-                });
-            } else {
-                hoodies = [];
-            }
-
-            // Render the existing index.ejs (expects hoodies array)
-            return res.render('index', { hoodies, user });
+    list: (req, res) => {
+        Hoodie.getAll((err, hoodies) => {
+            if (err) return res.status(500).send('Error loading products');
+            res.render('index', { hoodies, user: req.session.user });
         });
     },
 
-    // Get hoodie by ID -> render index with single item (basic)
-    getById: function(req, res) {
+    getById: (req, res) => {
         const id = req.params.id;
-        Hoodie.getById(id, function(err, hoodie) {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Internal Server Error');
-            }
-            if (!hoodie) return res.status(404).send('Hoodie not found');
-
-            hoodie.stock = Number(hoodie.stock) || 0;
-            hoodie.lowStock = hoodie.stock < 30;
-            const user = req.session ? req.session.user : null;
-
-            // reuse index.ejs by passing array with single item
-            return res.render('index', { hoodies: [hoodie], user });
+        Hoodie.getById(id, (err, hoodie) => {
+            if (err || !hoodie) return res.status(404).send('Hoodie not found');
+            res.render('update', { hoodie, user: req.session.user });
         });
     },
 
-    // Add new hoodie
-    add: function(req, res) {
-        const hoodie = {
+    add: (req, res) => {
+        const data = {
             name: req.body.name,
             description: req.body.description,
             price: req.body.price,
-            image_url: req.file ? req.file.filename : null,
+            image_url: req.file ? '/images/' + req.file.filename : null,
             stock: req.body.stock,
             season: req.body.season
         };
 
-        Hoodie.add(hoodie, function(err, result) {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Failed to add hoodie');
-            }
+        Hoodie.add(data, (err) => {
+            if (err) return res.status(500).send('Failed to add hoodie');
             res.redirect('/');
         });
     },
 
-    // Update hoodie
-    update: function(req, res) {
+    update: (req, res) => {
         const id = req.params.id;
-        const hoodie = {
+        const data = {
             name: req.body.name,
             description: req.body.description,
             price: req.body.price,
-            image_url: req.file ? req.file.filename : req.body.currentImage,
+            image_url: req.file ? '/images/' + req.file.filename : req.body.currentImage,
             stock: req.body.stock,
             season: req.body.season
         };
 
-        Hoodie.update(id, hoodie, function(err, result) {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Failed to update hoodie');
-            }
+        Hoodie.update(id, data, (err) => {
+            if (err) return res.status(500).send('Update failed');
             res.redirect('/');
         });
     },
 
-    // Delete hoodie
-    delete: function(req, res) {
+    delete: (req, res) => {
         const id = req.params.id;
-        Hoodie.delete(id, function(err, result) {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Failed to delete hoodie');
-            }
+        Hoodie.delete(id, (err) => {
+            if (err) return res.status(500).send('Delete failed');
             res.redirect('/');
         });
     }

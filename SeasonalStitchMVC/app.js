@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser'); // not needed, use express built-in
 const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
@@ -7,6 +7,10 @@ require('dotenv').config();
 
 const app = express();
 const PORT = 3000;
+
+// ensure Express knows where your views folder is (your folder is "Views")
+app.set('views', path.join(__dirname, 'Views'));
+app.set('view engine', 'ejs');
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -17,46 +21,57 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
-
 const upload = multer({ storage: storage });
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
+// Middleware setup
+app.use(express.urlencoded({ extended: true })); // replace body-parser
+app.use(express.static(path.join(__dirname, 'Public'))); // match your Public folder name
 
 // Session setup
 app.use(session({
-    secret: 'seasonalSecret',
+    secret: process.env.SESSION_SECRET || 'seasonalSecret',
     resave: false,
     saveUninitialized: true
 }));
 
 // Controllers
-const ProductController = require('./controllers/ProductController');
-const Hoodie = require('./models/Hoodie'); // For rendering edit form
+const ProductController = require('./Controllers/ProductController');
+const Hoodie = require('./Models/Hoodie');
+const User = require('./Models/User');
+const UserController = require('./Controllers/UserController');
+
+
+// Middleware for authentication
+const requireAuth = (req, res, next) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    next();
+};
+
+const requireAdmin = (req, res, next) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/');
+    }
+    next();
+};
 
 // Routes
+// Homepage and inventory
 app.get('/', ProductController.list);
 app.get('/inventory', ProductController.list);
 app.get('/hoodie/:id', ProductController.getById);
 
-// Admin routes - render the existing view filenames (add.ejs / update.ejs)
-app.get('/addHoodie', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') {
-        return res.redirect('/');
-    }
+// Admin routes - Add/Edit/Delete hoodies
+app.get('/addHoodie', requireAdmin, (req, res) => {
     res.render('add', { user: req.session.user });
 });
 
-app.post('/addHoodie', upload.single('image'), ProductController.add);
+app.post('/addHoodie', requireAdmin, upload.single('image'), ProductController.add);
 
-app.get('/editHoodie/:id', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') {
-        return res.redirect('/');
-    }
+app.get('/editHoodie/:id', requireAdmin, (req, res) => {
     const id = req.params.id;
-    Hoodie.getById(id, function(err, hoodie) {
+    Hoodie.getById(id, (err, hoodie) => {
         if (err) {
             console.error(err);
             return res.status(500).send('Error retrieving hoodie');
@@ -66,22 +81,32 @@ app.get('/editHoodie/:id', (req, res) => {
     });
 });
 
-app.post('/editHoodie/:id', upload.single('image'), ProductController.update);
-app.get('/deleteHoodie/:id', ProductController.delete);
+app.post('/editHoodie/:id', requireAdmin, upload.single('image'), ProductController.update);
+app.get('/deleteHoodie/:id', requireAdmin, ProductController.delete);
 
-// Temporary quick-login routes for testing (remove for production)
+// Temporary quick-login routes for testing (you can remove later)
 app.get('/loginAdmin', (req, res) => {
     req.session.user = { user_id: 1, full_name: 'Admin User', role: 'admin' };
     res.send('Logged in as admin. <a href="/">Go home</a>');
 });
+
 app.get('/loginUser', (req, res) => {
     req.session.user = { user_id: 2, full_name: 'Normal User', role: 'user' };
     res.send('Logged in as user. <a href="/">Go home</a>');
 });
+
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
+        if (err) console.error(err);
         res.redirect('/');
     });
 });
 
+// Login and Register routes
+app.get('/login', (req, res) => res.render('login'));
+app.post('/login', UserController.login);
+app.get('/register', (req, res) => res.render('register'));
+app.post('/register', UserController.register);
+
+// Start the server
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

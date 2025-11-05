@@ -1,0 +1,165 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f7f7f7;
+}
+
+/* Navigation */
+.navbar {
+    background-color: #2c5282;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.brand {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.nav-links a:hover {
+    background-color: #3182ce;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Grid Layout */
+.hoodies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Card Styles */
+.hoodie-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.hoodie-card:hover {
+    transform: translateY(-5px);
+}
+
+.hoodie-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.hoodie-info {
+    padding: 1.5rem;
+}
+
+.price {
+    font-size: 1.25rem;
+    color: #2c5282;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.stock {
+    color: #4a5568;
+}
+
+.low-stock {
+    color: #e53e3e;
+}
+
+/* Form Styles */
+.form-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: #2c5282;
+    color: white;
+}
+
+.btn-danger {
+    background: #e53e3e;
+    color: white;
+}
+
+.admin-controls {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.error-message {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #dc2626;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
