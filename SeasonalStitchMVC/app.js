@@ -36,7 +36,7 @@ app.use(session({
 
 // Controllers
 const ProductController = require('./Controllers/ProductController');
-const Hoodie = require('./Models/Hoodie');
+const Hoodie = require('../Models/Hoodie');
 const User = require('./Models/User');
 const UserController = require('./Controllers/UserController');
 
