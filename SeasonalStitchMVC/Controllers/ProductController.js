@@ -1,10 +1,16 @@
-const Hoodie = require('../models/Hoodie');
+const Hoodie = require('../Models/Hoodie');
 
 const ProductController = {
     list: (req, res) => {
         Hoodie.getAll((err, hoodies) => {
             if (err) return res.status(500).send('Error loading products');
-            res.render('index', { hoodies, user: req.session.user });
+            const decorated = (hoodies || []).map((hoodie) => ({
+                ...hoodie,
+                image_url: hoodie.image_url ? hoodie.image_url.replace(/^\/?images\//i, '') : '',
+                lowStock: Number(hoodie.stock) <= 5
+            }));
+            const cartCount = (req.session.cart || []).reduce((count, item) => count + item.quantity, 0);
+            res.render('index', { hoodies: decorated, user: req.session.user, cartCount });
         });
     },
 
@@ -12,7 +18,11 @@ const ProductController = {
         const id = req.params.id;
         Hoodie.getById(id, (err, hoodie) => {
             if (err || !hoodie) return res.status(404).send('Hoodie not found');
-            res.render('update', { hoodie, user: req.session.user });
+            const hoodieData = {
+                ...hoodie,
+                image_url: hoodie.image_url ? hoodie.image_url.replace(/^\/?images\//i, '') : ''
+            };
+            res.render('update', { hoodie: hoodieData, user: req.session.user });
         });
     },
 
@@ -21,7 +31,7 @@ const ProductController = {
             name: req.body.name,
             description: req.body.description,
             price: req.body.price,
-            image_url: req.file ? '/images/' + req.file.filename : null,
+            image_url: req.file ? req.file.filename : null,
             stock: req.body.stock,
             season: req.body.season
         };
@@ -38,7 +48,7 @@ const ProductController = {
             name: req.body.name,
             description: req.body.description,
             price: req.body.price,
-            image_url: req.file ? '/images/' + req.file.filename : req.body.currentImage,
+            image_url: req.file ? req.file.filename : req.body.currentImage,
             stock: req.body.stock,
             season: req.body.season
         };
